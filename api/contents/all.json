@@ -1,0 +1,57 @@
+{
+  "content": [
+    {
+      "content": null,
+      "created": "2026-11-25T16:56:07.969973Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2026-11-25T16:55:37.413310Z",
+      "mimetype": null,
+      "name": "01_Promenlivi.ipynb",
+      "path": "01_Promenlivi.ipynb",
+      "size": 8524,
+      "type": "notebook",
+      "writable": true
+    },
+    {
+      "content": null,
+      "created": "2026-11-25T16:56:07.970638Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2026-11-25T16:56:07.970638Z",
+      "mimetype": null,
+      "name": "helpers",
+      "path": "helpers",
+      "size": null,
+      "type": "directory",
+      "writable": true
+    },
+    {
+      "content": null,
+      "created": "2026-11-25T16:56:07.970276Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2026-11-25T16:55:37.413960Z",
+      "mimetype": null,
+      "name": "02_Masivi.ipynb",
+      "path": "02_Masivi.ipynb",
+      "size": 3794,
+      "type": "notebook",
+      "writable": true
+    }
+  ],
+  "created": "2026-11-25T16:56:07.970276Z",
+  "format": "json",
+  "hash": null,
+  "hash_algorithm": null,
+  "last_modified": "2026-11-25T16:56:07.970276Z",
+  "mimetype": null,
+  "name": "",
+  "path": "",
+  "size": null,
+  "type": "directory",
+  "writable": true
+}

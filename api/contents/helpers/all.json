@@ -1,0 +1,29 @@
+{
+  "content": [
+    {
+      "content": null,
+      "created": "2026-11-25T16:56:07.970638Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2026-11-25T16:55:37.413960Z",
+      "mimetype": "text/x-c++src",
+      "name": "Show_Functions.cpp",
+      "path": "helpers/Show_Functions.cpp",
+      "size": 1729,
+      "type": "file",
+      "writable": true
+    }
+  ],
+  "created": "2026-11-25T16:56:07.970638Z",
+  "format": "json",
+  "hash": null,
+  "hash_algorithm": null,
+  "last_modified": "2026-11-25T16:56:07.970638Z",
+  "mimetype": null,
+  "name": "helpers",
+  "path": "helpers",
+  "size": null,
+  "type": "directory",
+  "writable": true
+}
