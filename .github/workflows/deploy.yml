@@ -25,7 +25,6 @@ jobs:
         run: |
            jupyter lite build \
              --XeusAddon.environment_file=environment.yml \
-             --contents images \
              --contents notebooks \
              --output-dir docs
     
