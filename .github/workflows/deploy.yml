@@ -1,0 +1,37 @@
+name: Deploy JupyterLite
+
+on:
+  push:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-name: xeus-lite-host
+          create-args: >-
+            jupyter_server
+            jupyterlite-xeus
+            -c conda-forge
+          init-shell: bash
+
+      - name: Build JupyterLite
+        shell: bash -el {0}
+        run: |
+           jupyter lite build \
+             --XeusAddon.environment_file=environment.yml \
+             --contents images \
+             --contents notebooks \
+             --output-dir docs
+    
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
