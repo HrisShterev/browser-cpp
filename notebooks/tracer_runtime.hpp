@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <utility>
 #include <nlohmann/json.hpp>
+#include <xeus/xinterpreter.hpp>
 
 struct VarState {
     std::string name;
@@ -173,15 +174,17 @@ public:
     }
 };
 
-struct MemoryVisualizerOutput {};
-
-inline nlohmann::json mime_bundle_repr(const MemoryVisualizerOutput&) {
-    auto bundle = nlohmann::json::object();
-    bundle["text/html"] = TracerRuntime::render_html();
-    return bundle;
+inline void show_memory_widget() {
+    nlohmann::json pub_data;
+    pub_data["text/html"] = TracerRuntime::render_html();
+    xeus::get_interpreter().display_data(
+        std::move(pub_data),
+        nlohmann::json::object(),
+        nlohmann::json::object()
+    );
 }
 
-#define SHOW_MEMORY() MemoryVisualizerOutput{}
+#define SHOW_MEMORY() show_memory_widget()
 
 #define __trace_enter_func(name, line) TracerRuntime::enter_func(name, line)
 #define __trace_exit_func() TracerRuntime::exit_func()
