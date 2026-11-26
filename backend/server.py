@@ -103,7 +103,7 @@ def instrument_code(req: CodeRequest):
             + 'TracerRuntime::clear();\n'
             + '{\n'
             + "\n".join(out_body)
-            + '\n}\nSHOW_MEMORY()\n'
+            + '\n}\nSHOW_MEMORY();\n'
         )
         return {"instrumented_code": final_code, "stderr": res.stderr}
     finally:
