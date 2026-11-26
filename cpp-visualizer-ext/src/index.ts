@@ -92,4 +92,23 @@ class VisualizeMemoryButton
     button.node.style.backgroundColor = '#0d9488';
     button.node.style.color = '#ffffff';
     button.node.style.borderRadius = '4px';
-    button.node.style.padding =
+    button.node.style.padding = '0 10px';
+    button.node.style.marginLeft = '8px';
+
+    panel.toolbar.insertItem(10, 'visualizeMemory', button);
+
+    return new DisposableDelegate(() => {
+      button.dispose();
+    });
+  }
+}
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'cpp-visualizer-ext:plugin',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    app.docRegistry.addWidgetExtension('Notebook', new VisualizeMemoryButton());
+  }
+};
+
+export default plugin;
