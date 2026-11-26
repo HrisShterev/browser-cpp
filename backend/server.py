@@ -20,9 +20,10 @@ INSTRUMENTER_BIN = os.path.expanduser("~/browser-cpp/cpp_tracer/build/cpp-instru
 class CodeRequest(BaseModel):
     code: str
 
-def split_functions_and_statements(code: str):
-    """Отделя дефинициите на функции (напр. void swap_numbers(...)) от обикновените редове."""
+def split_code_parts(code: str):
+    """Отделя #include директивите, дефинициите на функции и обикновените редове."""
     lines = code.splitlines()
+    include_lines = []
     func_lines = []
     main_lines = []
     
@@ -31,6 +32,12 @@ def split_functions_and_statements(code: str):
     func_pattern = re.compile(r'^\s*(?:void|int|double|float|char|bool|long|short|auto|std::\w+)\s+\w+\s*\([^;]*\)\s*\{?\s*$')
 
     for line in lines:
+        stripped = line.strip()
+        if stripped.startswith('#include'):
+            if 'tracer_runtime.hpp' not in stripped:
+                include_lines.append(line)
+            continue
+
         if not in_function and brace_depth == 0 and func_pattern.match(line):
             in_function = True
             func_lines.append(line)
@@ -46,12 +53,12 @@ def split_functions_and_statements(code: str):
         else:
             main_lines.append(line)
 
-    return "\n".join(func_lines), "\n".join(main_lines)
+    return "\n".join(include_lines), "\n".join(func_lines), "\n".join(main_lines)
 
 @app.post("/instrument")
 def instrument_code(req: CodeRequest):
-    funcs_code, stmts_code = split_functions_and_statements(req.code)
-    wrapped_code = f"{funcs_code}\nvoid __student_cell__() {{\n{stmts_code}\n}}\n"
+    includes_code, funcs_code, stmts_code = split_code_parts(req.code)
+    wrapped_code = f"{includes_code}\n{funcs_code}\nvoid __student_cell__() {{\n{stmts_code}\n}}\n"
 
     with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as tmp:
         tmp.write(wrapped_code)
@@ -66,14 +73,15 @@ def instrument_code(req: CodeRequest):
         )
         instrumented = res.stdout
 
-        # Премахваме #include и обвивката void __student_cell__() { ... } за xeus-cpp
+        # Разделяме инструментираните функции от тялото на __student_cell__()
         lines = instrumented.splitlines()
-        out_lines = []
+        out_funcs = []
+        out_body = []
         inside_student_cell = False
         cell_brace_depth = 0
 
         for line in lines:
-            if line.startswith('#include "tracer_runtime.hpp"'):
+            if line.strip().startswith('#include'):
                 continue
             if "void __student_cell__()" in line:
                 inside_student_cell = True
@@ -84,13 +92,18 @@ def instrument_code(req: CodeRequest):
                 if cell_brace_depth <= 0:
                     inside_student_cell = False
                     continue
-            out_lines.append(line)
+                out_body.append(line)
+            else:
+                out_funcs.append(line)
 
         final_code = (
             '#include "tracer_runtime.hpp"\n'
-            'TracerRuntime::clear();\n'
-            + "\n".join(out_lines)
-            + "\nSHOW_MEMORY();\n"
+            + (includes_code + "\n" if includes_code else "")
+            + "\n".join(out_funcs) + "\n"
+            + 'TracerRuntime::clear();\n'
+            + '{\n'
+            + "\n".join(out_body)
+            + '\n}\nSHOW_MEMORY()\n'
         )
         return {"instrumented_code": final_code, "stderr": res.stderr}
     finally:
