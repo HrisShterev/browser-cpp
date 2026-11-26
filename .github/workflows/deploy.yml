@@ -2,7 +2,9 @@ name: Deploy JupyterLite
 
 on:
   push:
-  
+    branches:
+      - master
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,17 +19,28 @@ jobs:
           create-args: >-
             jupyter_server
             jupyterlite-xeus
+            jupyterlab
+            nodejs
             -c conda-forge
           init-shell: bash
+
+      - name: Build JupyterLab Visualizer Extension
+        shell: bash -el {0}
+        run: |
+          cd cpp-visualizer-ext
+          jlpm install
+          jlpm build:prod
+          mkdir -p "$CONDA_PREFIX/share/jupyter/labextensions/cpp-visualizer-ext"
+          cp -r cpp_visualizer_ext/labextension/* "$CONDA_PREFIX/share/jupyter/labextensions/cpp-visualizer-ext/"
 
       - name: Build JupyterLite
         shell: bash -el {0}
         run: |
-           jupyter lite build \
-             --XeusAddon.environment_file=environment.yml \
-             --contents notebooks \
-             --output-dir docs
-    
+          jupyter lite build \
+            --XeusAddon.environment_file=environment.yml \
+            --contents notebooks \
+            --output-dir docs
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
