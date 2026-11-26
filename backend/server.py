@@ -1,13 +1,13 @@
 import subprocess
 import tempfile
 import os
+import re
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
 
-# Позволяваме заявки от JupyterLite (порт 8000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,11 +20,38 @@ INSTRUMENTER_BIN = os.path.expanduser("~/browser-cpp/cpp_tracer/build/cpp-instru
 class CodeRequest(BaseModel):
     code: str
 
+def split_functions_and_statements(code: str):
+    """Отделя дефинициите на функции (напр. void swap_numbers(...)) от обикновените редове."""
+    lines = code.splitlines()
+    func_lines = []
+    main_lines = []
+    
+    brace_depth = 0
+    in_function = False
+    func_pattern = re.compile(r'^\s*(?:void|int|double|float|char|bool|long|short|auto|std::\w+)\s+\w+\s*\([^;]*\)\s*\{?\s*$')
+
+    for line in lines:
+        if not in_function and brace_depth == 0 and func_pattern.match(line):
+            in_function = True
+            func_lines.append(line)
+            brace_depth += line.count('{') - line.count('}')
+            continue
+
+        if in_function:
+            func_lines.append(line)
+            brace_depth += line.count('{') - line.count('}')
+            if brace_depth <= 0 and '{' in "".join(func_lines):
+                in_function = False
+                brace_depth = 0
+        else:
+            main_lines.append(line)
+
+    return "\n".join(func_lines), "\n".join(main_lines)
+
 @app.post("/instrument")
 def instrument_code(req: CodeRequest):
-    # Учениците в Jupyter пишат код директно в клетка (без int main()),
-    # а Clang AST изисква функция, затова го обвиваме във временна функция
-    wrapped_code = f"void __student_cell__() {{\n{req.code}\n}}\n"
+    funcs_code, stmts_code = split_functions_and_statements(req.code)
+    wrapped_code = f"{funcs_code}\nvoid __student_cell__() {{\n{stmts_code}\n}}\n"
 
     with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as tmp:
         tmp.write(wrapped_code)
@@ -39,27 +66,30 @@ def instrument_code(req: CodeRequest):
         )
         instrumented = res.stdout
 
-        # Премахваме обвивката void __student_cell__() { ... } за изпълнение в xeus-cpp
+        # Премахваме #include и обвивката void __student_cell__() { ... } за xeus-cpp
         lines = instrumented.splitlines()
-        body_lines = []
-        inside = False
+        out_lines = []
+        inside_student_cell = False
+        cell_brace_depth = 0
+
         for line in lines:
             if line.startswith('#include "tracer_runtime.hpp"'):
                 continue
             if "void __student_cell__()" in line:
-                inside = True
+                inside_student_cell = True
+                cell_brace_depth += line.count('{') - line.count('}')
                 continue
-            if inside:
-                body_lines.append(line)
-
-        # Махаме последната затваряща скоба '}'
-        if body_lines and body_lines[-1].strip() == "}":
-            body_lines.pop()
+            if inside_student_cell:
+                cell_brace_depth += line.count('{') - line.count('}')
+                if cell_brace_depth <= 0:
+                    inside_student_cell = False
+                    continue
+            out_lines.append(line)
 
         final_code = (
             '#include "tracer_runtime.hpp"\n'
             'TracerRuntime::clear();\n'
-            + "\n".join(body_lines)
+            + "\n".join(out_lines)
             + "\nSHOW_MEMORY();\n"
         )
         return {"instrumented_code": final_code, "stderr": res.stderr}

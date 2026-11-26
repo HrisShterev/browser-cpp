@@ -11,6 +11,8 @@ import {
 import { CodeCell } from '@jupyterlab/cells';
 import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
+const BACKEND_URL = 'https://unbiased-brought-equate.ngrok-free.dev/instrument';
+
 class VisualizeMemoryButton
   implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
 {
@@ -39,9 +41,12 @@ class VisualizeMemoryButton
 
         button.node.style.opacity = '0.6';
         try {
-          const resp = await fetch('http://127.0.0.1:8001/instrument', {
+          const resp = await fetch(BACKEND_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
+            },
             body: JSON.stringify({ code: studentCode })
           });
 
@@ -77,7 +82,7 @@ class VisualizeMemoryButton
           await future.done;
         } catch (err) {
           console.error('Грешка при връзка с instrumenter сървъра:', err);
-          alert('Неуспешна връзка с инструмента за визуализация (порт 8001).');
+          alert('Неуспешна връзка със сървъра за визуализация.');
         } finally {
           button.node.style.opacity = '1';
         }
@@ -87,23 +92,4 @@ class VisualizeMemoryButton
     button.node.style.backgroundColor = '#0d9488';
     button.node.style.color = '#ffffff';
     button.node.style.borderRadius = '4px';
-    button.node.style.padding = '0 10px';
-    button.node.style.marginLeft = '8px';
-
-    panel.toolbar.insertItem(10, 'visualizeMemory', button);
-
-    return new DisposableDelegate(() => {
-      button.dispose();
-    });
-  }
-}
-
-const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'cpp-visualizer-ext:plugin',
-  autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
-    app.docRegistry.addWidgetExtension('Notebook', new VisualizeMemoryButton());
-  }
-};
-
-export default plugin;
+    button.node.style.padding =
