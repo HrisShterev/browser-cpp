@@ -16,6 +16,12 @@
       },
       {
         "extension": "./extension",
+        "load": "static/remoteEntry.6941abe8f66f0ec67583.js",
+        "name": "cpp-visualizer-ext",
+        "style": "./style"
+      },
+      {
+        "extension": "./extension",
         "load": "static/remoteEntry.5cbb9d2323598fbda535.js",
         "name": "jupyterlab_pygments",
         "style": "./style"
