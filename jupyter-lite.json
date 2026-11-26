@@ -16,7 +16,7 @@
       },
       {
         "extension": "./extension",
-        "load": "static/remoteEntry.6941abe8f66f0ec67583.js",
+        "load": "static/remoteEntry.038fd92030c975ff26f7.js",
         "name": "cpp-visualizer-ext",
         "style": "./style"
       },

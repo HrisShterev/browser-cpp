@@ -41,7 +41,7 @@
     "extension": true,
     "outputDir": "cpp_visualizer_ext/labextension",
     "_build": {
-      "load": "static/remoteEntry.6941abe8f66f0ec67583.js",
+      "load": "static/remoteEntry.038fd92030c975ff26f7.js",
       "extension": "./extension",
       "style": "./style"
     }
