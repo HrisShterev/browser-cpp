@@ -90,8 +90,11 @@ public:
     bool VisitReturnStmt(ReturnStmt* RS) {
         if (!Context->getSourceManager().isInMainFile(RS->getBeginLoc()))
             return true;
-        TheRewriter.InsertTextBefore(RS->getBeginLoc(), 
-            "std::cout << TracerRuntime::to_json() << std::endl;\n    __trace_exit_func();\n    ");
+        TheRewriter.InsertTextBefore(RS->getBeginLoc(), "{ __trace_exit_func(); ");
+        SourceLocation EndLoc = Lexer::findLocationAfterToken(RS->getEndLoc(), tok::semi, Context->getSourceManager(), Context->getLangOpts(), false);
+        if (EndLoc.isValid()) {
+            TheRewriter.InsertTextAfter(EndLoc, " }");
+        }
         return true;
     }
 

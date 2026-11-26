@@ -133,8 +133,9 @@ public:
           return;
         }
         const s = steps[idx];
+        const funcLabel = (s.func === "__student_cell__" || s.func === "global") ? "main (главна програма)" : s.func;
         stepLabel.textContent = `Стъпка ${idx + 1} от ${steps.length}`;
-        infoDiv.innerHTML = `Функция: <b>${s.func}</b> | Ред: <b>${s.line}</b>`;
+        infoDiv.innerHTML = `Функция: <b>${funcLabel}</b> | Ред: <b>${s.line}</b>`;
         prevBtn.disabled = idx === 0;
         nextBtn.disabled = idx === steps.length - 1;
 
