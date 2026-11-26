@@ -1,0 +1,25 @@
+# JupyterLite build & cache
+_output/
+.jupyterlite.doit.db*
+
+# C++ / CMake build artifacts
+**/build/
+*.o
+*.so
+
+# Node.js / JupyterLab extension build
+**/node_modules/
+cpp-visualizer-ext/lib/
+cpp-visualizer-ext/cpp_visualizer_ext/
+*.tsbuildinfo
+.yarn/
+.pnp.*
+
+# Python cache & environments
+**/__pycache__/
+*.pyc
+**/.venv/
+
+# IDE / OS files
+.vscode/
+.ipynb_checkpoints/
